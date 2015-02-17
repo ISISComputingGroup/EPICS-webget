@@ -15,6 +15,10 @@ LIBRARY_IOC += webget
 # install webget.dbd into <top>/dbd
 DBD += webget.dbd
 
+ifeq ($(STATIC_BUILD),YES)
+USR_CPPFLAGS += -DCURL_STATICLIB
+endif
+
 # specify all source files to be compiled and added to the library
 webget_SRCS += webgetDriver.cpp
 

@@ -40,9 +40,7 @@ $(APPNAME)_LIBS += utilities pcre libjson zlib
 ## Add other libraries here ##
 $(APPNAME)_LIBS += webget asyn libcurl
 
-ifeq ($(STATIC_BUILD),YES)
-USR_CPPFLAGS += -DCURL_STATICLIB
-endif
+$(APPNAME)_SYS_LIBS_WIN32 += wldap32
 
 # testwebget_registerRecordDeviceDriver.cpp derives from testwebget.dbd
 $(APPNAME)_SRCS += $(APPNAME)_registerRecordDeviceDriver.cpp
