@@ -35,238 +35,26 @@
 
 static const char *driverName="webgetDriver"; ///< Name of driver for use in message printing 
 
-#if 0
-/// Function to translate a Win32 structured exception into a standard C++ exception. 
-/// This is registered via registerStructuredExceptionHandler()
-static void seTransFunction(unsigned int u, EXCEPTION_POINTERS* pExp)
-{
-	throw Win32StructuredException(u, pExp);
-}
-
-/// Register a handler for Win32 strcutured exceptions. This needs to be done on a per thread basis.
-static void registerStructuredExceptionHandler()
-{
-	_set_se_translator(seTransFunction);
-}
-
-template<typename T>
-asynStatus lvDCOMDriver::writeValue(asynUser *pasynUser, const char* functionName, T value)
-{
-	int function = pasynUser->reason;
-	asynStatus status = asynSuccess;
-	const char *paramName = NULL;
-	registerStructuredExceptionHandler();
-	getParamName(function, &paramName);
-	try
-	{
-		if (m_lvdcom == NULL)
-		{
-			throw std::runtime_error("m_lvdcom is NULL");
-		}
-		m_lvdcom->setLabviewValue(paramName, value);
-		asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
-			"%s:%s: function=%d, name=%s, value=%s\n", 
-			driverName, functionName, function, paramName, convertToString(value).c_str());
-		return asynSuccess;
-	}
-	catch(const std::exception& ex)
-	{
-		epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize, 
-			"%s:%s: status=%d, function=%d, name=%s, value=%s, error=%s", 
-			driverName, functionName, status, function, paramName, convertToString(value).c_str(), ex.what());
-		return asynError;
-	}
-}
-
-template<typename T>
-asynStatus lvDCOMDriver::readValue(asynUser *pasynUser, const char* functionName, T* value)
-{
-	int function = pasynUser->reason;
-	asynStatus status = asynSuccess;
-	const char *paramName = NULL;
-	registerStructuredExceptionHandler();
-	getParamName(function, &paramName);
-	try
-	{
-		if (m_lvdcom == NULL)
-		{
-			throw std::runtime_error("m_lvdcom is NULL");
-		}
-		m_lvdcom->getLabviewValue(paramName, value);
-		asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
-			"%s:%s: function=%d, name=%s, value=%s\n", 
-			driverName, functionName, function, paramName, convertToString(*value).c_str());
-		return asynSuccess;
-	}
-	catch(const std::exception& ex)
-	{
-		epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize, 
-			"%s:%s: status=%d, function=%d, name=%s, value=%s, error=%s", 
-			driverName, functionName, status, function, paramName, convertToString(*value).c_str(), ex.what());
-		return asynError;
-	}
-}
-
-template<typename T>
-asynStatus lvDCOMDriver::readArray(asynUser *pasynUser, const char* functionName, T *value, size_t nElements, size_t *nIn)
-{
-	int function = pasynUser->reason;
-	asynStatus status = asynSuccess;
-	const char *paramName = NULL;
-	registerStructuredExceptionHandler();
-	getParamName(function, &paramName);
-
-	try
-	{
-		if (m_lvdcom == NULL)
-		{
-			throw std::runtime_error("m_lvdcom is NULL");
-		}
-		m_lvdcom->getLabviewValue(paramName, value, nElements, *nIn);
-		asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
-			"%s:%s: function=%d, name=%s\n", 
-			driverName, functionName, function, paramName);
-		return asynSuccess;
-	}
-	catch(const std::exception& ex)
-	{
-		*nIn = 0;
-		epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize, 
-			"%s:%s: status=%d, function=%d, name=%s, error=%s", 
-			driverName, functionName, status, function, paramName, ex.what());
-		return asynError;
-	}
-}
-
-asynStatus lvDCOMDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
-{
-	return writeValue(pasynUser, "writeFloat64", value);
-}
-
-asynStatus lvDCOMDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
-{
-	return writeValue(pasynUser, "writeInt32", value);
-}
-
-asynStatus lvDCOMDriver::readFloat64Array(asynUser *pasynUser, epicsFloat64 *value, size_t nElements, size_t *nIn)
-{
-	return readArray(pasynUser, "readFloat64Array", value, nElements, nIn);
-}
-
-asynStatus lvDCOMDriver::readInt32Array(asynUser *pasynUser, epicsInt32 *value, size_t nElements, size_t *nIn)
-{
-	return readArray(pasynUser, "readInt32Array", value, nElements, nIn);
-}
-
-asynStatus lvDCOMDriver::readFloat64(asynUser *pasynUser, epicsFloat64 *value)
-{
-	return readValue(pasynUser, "readFloat64", value);
-}
-
-asynStatus lvDCOMDriver::readInt32(asynUser *pasynUser, epicsInt32 *value)
-{
-	return readValue(pasynUser, "readInt32", value);
-}
-
-asynStatus lvDCOMDriver::readOctet(asynUser *pasynUser, char *value, size_t maxChars, size_t *nActual, int *eomReason)
-{
-	int function = pasynUser->reason;
-	int status=0;
-	const char *functionName = "readOctet";
-	const char *paramName = NULL;
-	registerStructuredExceptionHandler();
-	getParamName(function, &paramName);
-	std::string value_s;
-	try
-	{
-		if (m_lvdcom == NULL)
-		{
-			throw std::runtime_error("m_lvdcom is NULL");
-		}
-		m_lvdcom->getLabviewValue(paramName, &value_s);
-		if ( value_s.size() > maxChars ) // did we read more than we have space for?
-		{
-			*nActual = maxChars;
-			if (eomReason) { *eomReason = ASYN_EOM_CNT | ASYN_EOM_END; }
-			asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
-				"%s:%s: function=%d, name=%s, value=\"%s\" (TRUNCATED from %d chars)\n", 
-				driverName, functionName, function, paramName, value_s.substr(0,*nActual).c_str(), value_s.size());
-		}
-		else
-		{
-			*nActual = value_s.size();
-			if (eomReason) { *eomReason = ASYN_EOM_END; }
-			asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
-				"%s:%s: function=%d, name=%s, value=\"%s\"\n", 
-				driverName, functionName, function, paramName, value_s.c_str());
-		}
-		strncpy(value, value_s.c_str(), maxChars); // maxChars  will NULL pad if possible, change to  *nActual  if we do not want this
-		return asynSuccess;
-	}
-	catch(const std::exception& ex)
-	{
-		epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize, 
-			"%s:%s: status=%d, function=%d, name=%s, value=\"%s\", error=%s", 
-			driverName, functionName, status, function, paramName, value_s.c_str(), ex.what());
-		*nActual = 0;
-		if (eomReason) { *eomReason = ASYN_EOM_END; }
-		value[0] = '\0';
-		return asynError;
-	}
-}
-
-asynStatus lvDCOMDriver::writeOctet(asynUser *pasynUser, const char *value, size_t maxChars, size_t *nActual)
-{
-	int function = pasynUser->reason;
-	asynStatus status = asynSuccess;
-	const char *paramName = NULL;
-	registerStructuredExceptionHandler();
-	getParamName(function, &paramName);
-	const char* functionName = "writeOctet";
-	std::string value_s(value, maxChars);
-	try
-	{
-		if (m_lvdcom == NULL)
-		{
-			throw std::runtime_error("m_lvdcom is NULL");
-		}
-		m_lvdcom->setLabviewValue(paramName, value_s);
-		asynPrint(pasynUser, ASYN_TRACEIO_DRIVER, 
-			"%s:%s: function=%d, name=%s, value=%s\n", 
-			driverName, functionName, function, paramName, value_s.c_str());
-		*nActual = value_s.size();
-		return asynSuccess;
-	}
-	catch(const std::exception& ex)
-	{
-		epicsSnprintf(pasynUser->errorMessage, pasynUser->errorMessageSize, 
-			"%s:%s: status=%d, function=%d, name=%s, value=%s, error=%s", 
-			driverName, functionName, status, function, paramName, value_s.c_str(), ex.what());
-		*nActual = 0;
-		return asynError;
-	}
-}
-
 /// EPICS driver report function for iocsh dbior command
-void lvDCOMDriver::report(FILE* fp, int details)
+void webgetDriver::report(FILE* fp, int details)
 {
-//	fprintf(fp, "lvDCOM report\n");
-	for(std::map<std::string,std::string>::const_iterator it=m_params.begin(); it != m_params.end(); ++it)
-	{
-		fprintf(fp, "Asyn param \"%s\" lvdcom type \"%s\"\n", it->first.c_str(), it->second.c_str());
-	}
-	if (m_lvdcom != NULL)
-	{
-		m_lvdcom->report(fp, details);
-	}
-	else
-	{
-		fprintf(fp, "DCOM pointer is NULL\n");
-	}
 	asynPortDriver::report(fp, details);
 }
 
-#endif
+struct WriteCallbackData 
+{
+  std::string& data;
+  WriteCallbackData(std::string& data_) : data(data_) { }
+};
+ 
+static size_t
+WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+    size_t realsize = size * nmemb;
+    struct WriteCallbackData *mem = (struct WriteCallbackData *)userp;
+    mem->data.append(std::string((const char*)contents, realsize));
+    return realsize;
+}
 
 /// Constructor for the lvDCOMDriver class.
 /// Calls constructor for the asynPortDriver base class and sets up driver parameters.
@@ -283,18 +71,75 @@ webgetDriver::webgetDriver(const char *portName)
 	1, /* Autoconnect */
 	0, /* Default priority */
 	0)	/* Default stack size*/
-	
 {
 	int i;
-	const char *functionName = "lvDCOMDriver";
-	CURL *curl = curl_easy_init();
-    if(curl) {
-   CURLcode res;
-   curl_easy_setopt(curl, CURLOPT_URL, "http://www.isis.stfc.ac.uk");
-   res = curl_easy_perform(curl);
-   curl_easy_cleanup(curl);
-   }
+	const char *functionName = "webgetDriver";
+//  curl_global_init(CURL_GLOBAL_ALL);
+	createParam(P_URL0String, asynParamOctet, &P_URL0);
+	createParam(P_Data0String, asynParamOctet, &P_Data0);
+	createParam(P_PollTimeString, asynParamFloat64, &P_PollTime);
+    setStringParam(P_URL0, "");
+    setDoubleParam(P_PollTime, 5.0);
+//  curl_global_cleanup();
+    if (epicsThreadCreate("webgetDriverPoller",
+                          epicsThreadPriorityMedium,
+                          epicsThreadGetStackSize(epicsThreadStackMedium),
+                          (EPICSTHREADFUNC)pollerTaskC, this) == 0)
+    {
+        printf("%s:%s: epicsThreadCreate failure\n", driverName, functionName);
+        return;
+    }
+}
 
+void webgetDriver::pollerTask()
+{
+    double poll_time = 5.0;
+	char url0[256];
+	std::string data;
+    while(true)
+	{
+	    lock();
+	    getStringParam(P_URL0, sizeof(url0), url0);
+		if (strlen(url0) > 0)
+		{
+		    readURL(url0, data);
+			setStringParam(P_Data0, data.c_str());
+			callParamCallbacks();
+		}
+		getDoubleParam(P_PollTime, &poll_time);
+		unlock();
+		if (poll_time <= 0.0)
+		{
+		    poll_time = 5.0;
+		}
+		epicsThreadSleep(poll_time);
+	}
+}
+
+void webgetDriver::readURL(const char* url, std::string& data)
+{
+	data.clear();
+	CURL *curl = curl_easy_init();
+    if(curl) 
+	{
+        CURLcode res;
+        WriteCallbackData* cd = new WriteCallbackData(data);
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+	    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)cd);
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+        res = curl_easy_perform(curl);
+//  if(res != CURLE_OK) {
+//    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+//            curl_easy_strerror(res));
+        curl_easy_cleanup(curl);
+		delete cd;
+	}
+}
+
+asynStatus webgetDriver::readOctet(asynUser *pasynUser, char *value, size_t maxChars, size_t *nActual, int *eomReason)
+{
+    return asynPortDriver::readOctet(pasynUser, value, maxChars, nActual, eomReason);
 }
 
 
