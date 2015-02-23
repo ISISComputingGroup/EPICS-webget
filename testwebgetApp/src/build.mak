@@ -38,7 +38,7 @@ $(APPNAME)_LIBS += icpconfig pugixml
 $(APPNAME)_LIBS += autosave
 $(APPNAME)_LIBS += utilities pcre libjson zlib
 ## Add other libraries here ##
-$(APPNAME)_LIBS += webget asyn libcurl
+$(APPNAME)_LIBS += webget asyn libcurl htmltidy pugixml
 
 $(APPNAME)_SYS_LIBS_WIN32 += wldap32
 

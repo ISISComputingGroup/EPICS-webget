@@ -1,24 +1,40 @@
 record(stringout, "$(P)URL0")
 {
     field(DTYP, "asynOctetWrite")
-    field(OUT, "@asyn(T1,0,0)URL0")
+    field(OUT, "@asyn($(PORT),0,0)URL0")
 	field(PINI, "YES")
 	field(VAL, "")
 }
 
-record(waveform, "$(P)DATA0")
+record(stringin, "$(P)DATA0")
 {
     field(DTYP, "asynOctetRead")
-    field(INP, "@asyn(T1,0,0)DATA0")
+    field(INP, "@asyn($(PORT),0,0)DATA0")
+	field(SCAN, "I/O Intr")
+}
+
+record(waveform, "$(P)DATA0WF")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP, "@asyn($(PORT),0,0)DATA0")
 	field(FTVL, "CHAR")
 	field(NELM, 1024)
 	field(SCAN, "I/O Intr")
 }
 
+## xpath expression "//*" would match all content
+record(stringout, "$(P)XPATH0")
+{
+    field(DTYP, "asynOctetWrite")
+    field(OUT, "@asyn($(PORT),0,0)XPATH0")
+	field(PINI, "YES")
+	field(VAL, "")
+}
+
 record(ao, "$(P)POLLTIME")
 {
     field(DTYP, "asynFloat64")
-    field(OUT, "@asyn(T1,0,0)POLLTIME")
+    field(OUT, "@asyn($(PORT),0,0)POLLTIME")
 	field(VAL, 5.0)
 	field(PINI, "YES")
 }

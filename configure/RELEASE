@@ -48,6 +48,8 @@ ZLIB=$(SUPPORT)/zlib/1-2-8
 ASYN=$(SUPPORT)/asyn/4-26
 CURL=$(SUPPORT)/curl
 ONCRPC=$(SUPPORT)/oncrpc/2
+STREAMDEVICE=$(SUPPORT)/StreamDevice
+HTMLTIDY=$(SUPPORT)/htmltidy
 
 ## add other modules here ##
 

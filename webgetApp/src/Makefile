@@ -16,13 +16,18 @@ LIBRARY_IOC += webget
 DBD += webget.dbd
 
 ifeq ($(STATIC_BUILD),YES)
-USR_CPPFLAGS += -DCURL_STATICLIB
+USR_CPPFLAGS += -DCURL_STATICLIB 
+USE_CPPFLAGS_WIN32 += -DTIDY_EXPORT=extern
+endif
+
+ifeq ($(SHARED_LIBRARIES),YES)
+USR_CPPFLAGS_WIN32 += -DTIDY_EXPORT=__declspec(dllimport)
 endif
 
 # specify all source files to be compiled and added to the library
 webget_SRCS += webgetDriver.cpp
 
-webget_LIBS += asyn libcurl
+webget_LIBS += asyn libcurl htmltidy pugixml
 webget_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 #===========================
