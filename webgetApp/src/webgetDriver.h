@@ -41,6 +41,7 @@ private:
 		driver->pollerTask();	    
 	}
 	void pollerTask();
+	void processURL();
 };
 
 #define P_URL0String "URL0"

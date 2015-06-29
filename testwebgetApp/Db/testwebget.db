@@ -28,7 +28,7 @@ record(stringout, "$(P)XPATH0")
     field(DTYP, "asynOctetWrite")
     field(OUT, "@asyn($(PORT),0,0)XPATH0")
 	field(PINI, "YES")
-	field(VAL, "")
+	field(VAL, "//*")
 }
 
 record(ao, "$(P)POLLTIME")

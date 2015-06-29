@@ -86,7 +86,6 @@ webgetDriver::webgetDriver(const char *portName, unsigned options)
 	0),	/* Default stack size*/
 	m_shutdown(false), m_options(options)
 {
-	int i;
 	const char *functionName = "webgetDriver";
 //  curl_global_init(CURL_GLOBAL_ALL);
 	createParam(P_URL0String, asynParamOctet, &P_URL0);
@@ -94,8 +93,8 @@ webgetDriver::webgetDriver(const char *portName, unsigned options)
 	createParam(P_PollTimeString, asynParamFloat64, &P_PollTime);
 	createParam(P_XPath0String, asynParamOctet, &P_XPath0);
     setStringParam(P_URL0, "");
-    setDoubleParam(P_PollTime, 5.0);
-    setStringParam(P_XPath0, "");
+    setDoubleParam(P_PollTime, 0.0);
+    setStringParam(P_XPath0, "//*"); // return everything
 //  curl_global_cleanup();
     if (epicsThreadCreate("webgetDriverPoller",
                           epicsThreadPriorityMedium,
@@ -109,12 +108,29 @@ webgetDriver::webgetDriver(const char *portName, unsigned options)
 
 void webgetDriver::pollerTask()
 {
-    double poll_time = 5.0;
-	char url0[256], xpath0[256];
-	std::string data, value;
+    double poll_time = 0.0;
     while(!m_shutdown)
 	{
-	    lock();
+        getDoubleParam(P_PollTime, &poll_time);
+        if (poll_time > 0.0)
+        {
+	        lock();
+            processURL();
+		    unlock();
+		    epicsThreadSleep(poll_time);
+        }
+        else
+        {
+		    epicsThreadSleep(5.0);
+        }
+	}
+	m_shutdown = false;
+}
+
+void webgetDriver::processURL()
+{
+	char url0[256], xpath0[256];
+	std::string data, value;
 	    getStringParam(P_URL0, sizeof(url0), url0);
 	    getStringParam(P_XPath0, sizeof(xpath0), xpath0);
 		if (strlen(url0) > 0)
@@ -124,15 +140,6 @@ void webgetDriver::pollerTask()
 			setStringParam(P_Data0, value.c_str());
 			callParamCallbacks();
 		}
-		getDoubleParam(P_PollTime, &poll_time);
-		unlock();
-		if (poll_time <= 0.0)
-		{
-		    poll_time = 5.0;
-		}
-		epicsThreadSleep(poll_time);
-	}
-	m_shutdown = false;
 }
 
 void webgetDriver::readURL(const char* url, std::string& data)
@@ -161,6 +168,16 @@ void webgetDriver::readURL(const char* url, std::string& data)
 
 asynStatus webgetDriver::readOctet(asynUser *pasynUser, char *value, size_t maxChars, size_t *nActual, int *eomReason)
 {
+    int function = pasynUser->reason;
+    asynStatus status = asynSuccess;
+    const char *paramName = NULL;
+	getParamName(function, &paramName);
+    double poll_time = 0.0;
+    getDoubleParam(P_PollTime, &poll_time);
+    if ( poll_time <= 0.0 && function == P_Data0 )
+    {
+        processURL();
+    }
     return asynPortDriver::readOctet(pasynUser, value, maxChars, nActual, eomReason);
 }
 
