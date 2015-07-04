@@ -77,7 +77,7 @@ WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 webgetDriver::webgetDriver(const char *portName, unsigned options) 
 	: asynPortDriver(portName, 
 	0, /* maxAddr */ 
-	10,
+	NUM_WEBGET_PARAMS,
 	asynInt32Mask | asynInt32ArrayMask | asynFloat64Mask | asynFloat64ArrayMask | asynOctetMask | asynDrvUserMask, /* Interface mask */
 	asynInt32Mask | asynInt32ArrayMask | asynFloat64Mask | asynFloat64ArrayMask | asynOctetMask,  /* Interrupt mask */
 	ASYN_CANBLOCK, /* asynFlags.  This driver can block but it is not multi-device */
@@ -93,6 +93,7 @@ webgetDriver::webgetDriver(const char *portName, unsigned options)
 	createParam(P_PollTimeString, asynParamFloat64, &P_PollTime);
 	createParam(P_XPath0String, asynParamOctet, &P_XPath0);
     setStringParam(P_URL0, "");
+    setStringParam(P_Data0, "");
     setDoubleParam(P_PollTime, 0.0);
     setStringParam(P_XPath0, "//*"); // return everything
 //  curl_global_cleanup();
@@ -266,7 +267,7 @@ extern "C" {
 		}
 		catch(const std::exception& ex)
 		{
-			errlogSevPrintf(errlogFatal, "lvDCOMConfigure failed: %s\n", ex.what());
+			errlogSevPrintf(errlogFatal, "webgetConfigure failed: %s\n", ex.what());
 			return(asynError);
 		}
 	}

@@ -21,11 +21,17 @@ public:
     enum WebgetOptions { TidyWarnings = 0x1 };
 	
 private:
+
+#define FIRST_WEBGET_PARAM P_PollTime
+
 	int P_PollTime; // double
     int P_URL0; // string
     int P_Data0; // string
     int P_XPath0; // string
-	
+
+#define LAST_WEBGET_PARAM 	P_XPath0
+#define NUM_WEBGET_PARAMS	(&LAST_WEBGET_PARAM - &FIRST_WEBGET_PARAM + 1)
+
 	bool m_shutdown;
 	unsigned m_options;
 	
