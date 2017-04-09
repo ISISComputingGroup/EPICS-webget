@@ -17,6 +17,8 @@ class epicsShareClass webgetDriver : public asynPortDriver
 public:
 	webgetDriver(const char *portName, unsigned options);
 	virtual asynStatus readOctet(asynUser *pasynUser, char *value, size_t maxChars, size_t *nActual, int *eomReason);
+	virtual asynStatus readInt32(asynUser *pasynUser, epicsInt32 *value);
+    virtual asynStatus readFloat64(asynUser *pasynUser, epicsFloat64 *value);
 	virtual void report(FILE* fp, int details);
     enum WebgetOptions { TidyWarnings = 0x1 };
 	
@@ -27,6 +29,8 @@ private:
 	int P_PollTime; // double
     int P_URL0; // string
     int P_Data0; // string
+    int P_IData0; // integer
+    int P_FData0; // double
     int P_XPath0; // string
 
 #define LAST_WEBGET_PARAM 	P_XPath0
@@ -52,6 +56,8 @@ private:
 
 #define P_URL0String "URL0"
 #define P_Data0String "DATA0"
+#define P_IData0String "IDATA0"
+#define P_FData0String "FDATA0"
 #define P_XPath0String "XPATH0"
 #define P_PollTimeString "POLLTIME"
 

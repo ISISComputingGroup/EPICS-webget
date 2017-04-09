@@ -90,10 +90,14 @@ webgetDriver::webgetDriver(const char *portName, unsigned options)
 //  curl_global_init(CURL_GLOBAL_ALL);
 	createParam(P_URL0String, asynParamOctet, &P_URL0);
 	createParam(P_Data0String, asynParamOctet, &P_Data0);
+	createParam(P_IData0String, asynParamInt32, &P_IData0);
+	createParam(P_FData0String, asynParamFloat64, &P_FData0);
 	createParam(P_PollTimeString, asynParamFloat64, &P_PollTime);
 	createParam(P_XPath0String, asynParamOctet, &P_XPath0);
     setStringParam(P_URL0, "");
     setStringParam(P_Data0, "");
+    setIntegerParam(P_IData0, 0);
+    setDoubleParam(P_FData0, 0.0);
     setDoubleParam(P_PollTime, 0.0);
     setStringParam(P_XPath0, "//*"); // return everything
 //  curl_global_cleanup();
@@ -139,6 +143,8 @@ void webgetDriver::processURL()
 		    readURL(url0, data);
 			value = runXPath(data, xpath0);
 			setStringParam(P_Data0, value.c_str());
+			setIntegerParam(P_IData0, atol(value.c_str()));
+			setDoubleParam(P_FData0, atof(value.c_str()));
 			callParamCallbacks();
 		}
 }
@@ -180,6 +186,30 @@ asynStatus webgetDriver::readOctet(asynUser *pasynUser, char *value, size_t maxC
         processURL();
     }
     return asynPortDriver::readOctet(pasynUser, value, maxChars, nActual, eomReason);
+}
+
+asynStatus webgetDriver::readInt32(asynUser *pasynUser, epicsInt32 *value)
+{
+    int function = pasynUser->reason;
+    double poll_time = 0.0;
+    getDoubleParam(P_PollTime, &poll_time);
+    if ( poll_time <= 0.0 && function == P_IData0 )
+    {
+        processURL();
+    }
+    return asynPortDriver::readInt32(pasynUser, value);
+}
+
+asynStatus webgetDriver::readFloat64(asynUser *pasynUser, epicsFloat64 *value)
+{
+    int function = pasynUser->reason;
+    double poll_time = 0.0;
+    getDoubleParam(P_PollTime, &poll_time);
+    if ( poll_time <= 0.0 && function == P_FData0 )
+    {
+        processURL();
+    }
+    return asynPortDriver::readFloat64(pasynUser, value);
 }
 
 int webgetDriver::tidyHTML2XHTML(const std::string& html_in, std::string& xhtml_out, bool warnings)
