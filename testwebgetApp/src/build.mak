@@ -42,7 +42,7 @@ $(APPNAME)_LIBS += utilities pcre libjson zlib
 $(APPNAME)_LIBS += webget asyn htmltidy pugixml
 $(APPNAME)_LIBS_WIN32 += libcurl
 $(APPNAME)_SYS_LIBS_Linux += curl
-$(APPNAME)_SYS_LIBS_WIN32 += wldap32
+$(APPNAME)_SYS_LIBS_WIN32 += wldap32 crypt32 Normaliz
 
 # testwebget_registerRecordDeviceDriver.cpp derives from testwebget.dbd
 $(APPNAME)_SRCS += $(APPNAME)_registerRecordDeviceDriver.cpp
