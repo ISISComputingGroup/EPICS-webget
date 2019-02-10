@@ -15,6 +15,10 @@
 #include <aSubRecord.h>
 #include <menuFtype.h>
 #include <errlog.h>
+#include <dbLock.h>
+#include <recSup.h>
+#include <epicsThread.h>
+#include <callback.h>
 
 // CURL
 #include <curl/curl.h>
@@ -37,7 +41,8 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
  *  @ingroup asub_functions
  *  @param[in] prec Pointer to aSub record
  */
-static long webPOSTRequest(aSubRecord *prec) 
+
+static int webPOSTRequestThreadImp(aSubRecord* prec) 
 {
 	const char* url = getString(prec->a, prec->fta, prec->noa);
 	const char* urlEncodedFormData = getString(prec->b, prec->ftb, prec->nob); /* from webFormURLEncode() */
@@ -45,12 +50,12 @@ static long webPOSTRequest(aSubRecord *prec)
 	if (curl == NULL)
 	{
          errlogPrintf("%s curl init error", prec->name);
-		 return -1;		
+		 return 1;		
 	}
 	if (url == NULL || urlEncodedFormData == NULL)
 	{
          errlogPrintf("%s input args A or B are invalid", prec->name);
-		 return -1;		
+		 return 1;		
 	}
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, urlEncodedFormData);
@@ -66,7 +71,50 @@ static long webPOSTRequest(aSubRecord *prec)
 		errlogSevPrintf(errlogMajor, "%s curl_easy_perform() failed: %s\n", prec->name, curl_easy_strerror(res));
 	}
 	curl_easy_cleanup(curl);
-	return (res == CURLE_OK ? 0 : -1); /* only process output link on success */
+	return (res == CURLE_OK ? 0 : 1); /* only process output link on success */
+}
+
+typedef long (*rset_process_t)(dbCommon *);
+
+static void webPOSTRequestThread(void* arg) 
+{
+	
+	aSubRecord *prec =  (aSubRecord *)arg;
+	dbCommon *pcomrec =  (dbCommon *)arg;
+	int ret;
+	try {
+	    ret = webPOSTRequestThreadImp(prec);
+	}
+	catch(...) {
+		errlogSevPrintf(errlogMajor, "%s failed\n", prec->name);
+		ret = 1;
+	}
+    struct rset *prset =(struct rset *)(prec->rset);
+    dbScanLock(pcomrec);
+	prec->dpvt = reinterpret_cast<void*>(ret); // store return val in driver private area
+    (*(rset_process_t)prset->process)(pcomrec); // needed until USE_TYPED_RSET available
+    dbScanUnlock(pcomrec);
+}
+
+static long webPOSTRequest(aSubRecord *prec) 
+{
+	if (prec->pact == 0)
+	{
+	    prec->pact = 1;
+	    epicsThreadCreate("webPOSTRequest", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), webPOSTRequestThread, prec);
+	    return 0;
+	}
+	else
+	{
+		if (prec->dpvt == 0)
+		{
+			return 0;			
+		}
+		else
+		{
+		    return -1;
+		}
+	}
 }
 
 extern "C" {
