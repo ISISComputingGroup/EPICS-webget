@@ -25,7 +25,7 @@ USR_CPPFLAGS_WIN32 += -DTIDY_EXPORT=__declspec(dllimport)
 endif
 
 # specify all source files to be compiled and added to the library
-webget_SRCS += webgetDriver.cpp
+webget_SRCS += webgetDriver.cpp webFormURLEncode.cpp webPOSTRequest.cpp
 
 webget_LIBS += asyn htmltidy pugixml
 webget_LIBS_WIN32 += libcurl
