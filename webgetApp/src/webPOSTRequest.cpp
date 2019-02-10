@@ -9,6 +9,7 @@
  *  it write its output to VALA
  */
 #include <string>
+#include <iostream>
 
 #include <registryFunction.h>
 #include <aSubRecord.h>
@@ -26,7 +27,7 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
 {
 	aSubRecord *prec = (aSubRecord *)userdata;
 	std::string message(ptr, nmemb * size);
-	errlogSevPrintf(errlogInfo, "%s: %s\n", prec->name, message.c_str());
+	std::cerr << prec->name << ": Reply: " << message << std::endl;
 	return nmemb;
 }
 
@@ -58,6 +59,7 @@ static long webPOSTRequest(aSubRecord *prec)
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, prec);	
 	// curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
 	// need CURLOPT_NOSIGNAL set to 1 ?
+	std::cerr << prec->name << ": POSTing \"" << urlEncodedFormData << "\" to " << url << std::endl;
 	CURLcode res = curl_easy_perform(curl);
 	if (res != CURLE_OK)
 	{

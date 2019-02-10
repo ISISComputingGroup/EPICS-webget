@@ -1,0 +1,149 @@
+## You need to caput to MOBILES:SP and EMAILS:SP as ; separated lists, they are autosaved
+## Also need to set PW:SP and URL:SP  and INST:SP as per wiki page
+## SOURCE:SP is optionally specified by macro on DB load, defaults to "IBEX"
+## Write message to $(P)$(Q)MESSAGE:SP to send it
+
+record(stringin, "$(P)$(Q)MOBILES:TAG")
+{
+    field(VAL, "mobiles")
+}
+
+## numbers separated by ; e.g.  "012345678;02345678"
+record(waveform, "$(P)$(Q)MOBILES:SP")
+{
+    field(DESC, "Mobile numbers")
+	field(FTVL, "CHAR")
+	field(NELM, 1024)
+    info(autosaveFields, "VAL")
+}
+
+record(stringin, "$(P)$(Q)EMAILS:TAG")
+{
+    field(VAL, "emails")
+}
+
+## addresses spearated by ;   e.g.  "a@b;c@d"
+record(waveform, "$(P)$(Q)EMAILS:SP")
+{
+    field(DESC, "Email addresses")
+	field(FTVL, "CHAR")
+	field(NELM, 1024)
+    info(autosaveFields, "VAL")
+}
+
+record(stringin, "$(P)$(Q)MESSAGE:TAG")
+{
+    field(VAL, "message")
+}
+
+record(waveform, "$(P)$(Q)MESSAGE:SP")
+{
+    field(DESC, "Message to send")
+	field(FTVL, "CHAR")
+	field(NELM, 1024)
+    field(FLNK, "$(P)$(Q)_POSTFIELDS.PROC")
+    info(autosaveFields, "VAL")
+}
+
+record(stringin, "$(P)$(Q)PW:TAG")
+{
+    field(VAL, "pw")
+}
+
+record(stringin, "$(P)$(Q)PW:SP")
+{
+    info(autosaveFields, "VAL")
+}
+
+record(stringin, "$(P)$(Q)SOURCE:TAG")
+{
+    field(VAL, "source")
+}
+
+record(stringin, "$(P)$(Q)SOURCE:SP")
+{
+    field(DESC, "Message source")
+    field(VAL, "$(SOURCE=IBEX)")
+}
+
+record(stringin, "$(P)$(Q)INST:TAG")
+{
+    field(VAL, "inst")
+}
+
+record(stringin, "$(P)$(Q)INST:SP")
+{
+    field(DESC, "Instrument name for alerts")
+    info(autosaveFields, "VAL")
+}
+
+## URL to send request to
+record(waveform, "$(P)$(Q)URL:SP")
+{
+    field(DESC, "URL to POST to")
+	field(FTVL, "CHAR")
+	field(NELM, 1024)
+    info(autosaveFields, "VAL")
+}
+
+record(aSub, "$(P)$(Q)_POSTFIELDS")
+{
+	field(SNAM, "webFormURLEncode")
+    field(INPA, "$(P)$(Q)MOBILES:TAG")
+    field(FTA, "STRING")
+    field(NOA, 1)
+    field(INPB, "$(P)$(Q)MOBILES:SP")
+    field(FTB, "CHAR")
+    field(NOB, 1024)
+    field(INPC, "$(P)$(Q)EMAILS:TAG")
+    field(FTC, "STRING")
+    field(NOC, 1)
+    field(INPD, "$(P)$(Q)EMAILS:SP")
+    field(FTD, "CHAR")
+    field(NOD, 1024)
+    field(INPE, "$(P)$(Q)MESSAGE:TAG")
+    field(FTE, "STRING")
+    field(NOE, 1)
+    field(INPF, "$(P)$(Q)MESSAGE:SP")
+    field(FTF, "CHAR")
+    field(NOF, 1024)
+    field(INPG, "$(P)$(Q)PW:TAG")
+    field(FTG, "STRING")
+    field(NOG, 1)
+    field(INPH, "$(P)$(Q)PW:SP")
+    field(FTH, "STRING")
+    field(NOH, 1)
+    field(INPI, "$(P)$(Q)SOURCE:TAG")
+    field(FTI, "STRING")
+    field(NOI, 1)
+    field(INPJ, "$(P)$(Q)SOURCE:SP")
+    field(FTJ, "STRING")
+    field(NOJ, 1)
+    field(INPK, "$(P)$(Q)INST:TAG")
+    field(FTK, "STRING")
+    field(NOK, 1)
+    field(INPL, "$(P)$(Q)INST:SP")
+    field(FTL, "STRING")
+    field(NOL, 1)
+ 	field(FTVA, "CHAR")
+	field(NOVA, "1024")
+	field(OUTA, "$(P)$(Q)_POSTFIELDS:RES PP")
+}
+
+record(waveform, "$(P)$(Q)_POSTFIELDS:RES")
+{
+	field(FTVL, "CHAR")
+	field(NELM, 1024)
+	field(FLNK, "$(P)$(Q)_WEBSEND.PROC")
+}
+
+record(aSub, "$(P)$(Q)_WEBSEND")
+{
+	field(SNAM, "webPOSTRequest")
+    field(INPA, "$(P)$(Q)URL:SP NPP")
+    field(FTA, "CHAR")
+    field(NOA, 1024)
+    field(INPB, "$(P)$(Q)_POSTFIELDS:RES NPP")
+    field(FTB, "CHAR")
+    field(NOB, 1024)
+}

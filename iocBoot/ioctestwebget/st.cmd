@@ -15,6 +15,7 @@ webgetConfigure("T1")
 
 ## Load record instances
 dbLoadRecords("../../db/testwebget.db","P=$(MYPVPREFIX),PORT=T1")
+dbLoadRecords("../../db/sendAlert.db","P=$(MYPVPREFIX),Q=WEBGET:,SOURCE=TEST")
 
 iocInit()
 
