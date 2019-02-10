@@ -9,6 +9,7 @@
  *  it write its output to VALA
  */
 #include <string>
+#include <cstring>
 #include <sstream>
 
 #include <registryFunction.h>
