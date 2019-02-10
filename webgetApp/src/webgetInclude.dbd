@@ -1,1 +1,3 @@
 registrar("webgetRegister")
+function(webFormURLEncode)
+function(webPOSTRequest)

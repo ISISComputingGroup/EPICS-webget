@@ -87,7 +87,6 @@ webgetDriver::webgetDriver(const char *portName, unsigned options)
 	m_shutdown(false), m_options(options)
 {
 	const char *functionName = "webgetDriver";
-//  curl_global_init(CURL_GLOBAL_ALL);
 	createParam(P_URL0String, asynParamOctet, &P_URL0);
 	createParam(P_Data0String, asynParamOctet, &P_Data0);
 	createParam(P_IData0String, asynParamInt32, &P_IData0);
@@ -100,7 +99,6 @@ webgetDriver::webgetDriver(const char *portName, unsigned options)
     setDoubleParam(P_FData0, 0.0);
     setDoubleParam(P_PollTime, 0.0);
     setStringParam(P_XPath0, "//*"); // return everything
-//  curl_global_cleanup();
     if (epicsThreadCreate("webgetDriverPoller",
                           epicsThreadPriorityMedium,
                           epicsThreadGetStackSize(epicsThreadStackMedium),
@@ -320,6 +318,7 @@ extern "C" {
 	static void webgetRegister(void)
 	{
 		iocshRegister(&initFuncDef, initCallFunc);
+		curl_global_init(CURL_GLOBAL_ALL);
 	}
 
 	epicsExportRegistrar(webgetRegister);
