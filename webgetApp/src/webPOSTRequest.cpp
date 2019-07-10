@@ -24,6 +24,8 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 
+#include <epicsExport.h>
+
 #include "webUtils.h"
 
 // nmemb can be 0 and data may not be NULL terminated
@@ -35,7 +37,6 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
 	return nmemb;
 }
 
-#include <epicsExport.h>
 /**
  *  Convert a character waveform into a string waveform
  *  @ingroup asub_functions
@@ -50,20 +51,19 @@ static int webPOSTRequestThreadImp(aSubRecord* prec)
 	if (curl == NULL)
 	{
          errlogPrintf("%s curl init error", prec->name);
-		 return 1;		
+		 return 1;
 	}
 	if (url == NULL || urlEncodedFormData == NULL)
 	{
          errlogPrintf("%s input args A or B are invalid", prec->name);
-		 return 1;		
+		 return 1;
 	}
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, urlEncodedFormData);
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, prec);	
-	// curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
-	// need CURLOPT_NOSIGNAL set to 1 ?
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 	std::cerr << prec->name << ": POSTing \"" << urlEncodedFormData << "\" to " << url << std::endl;
 	CURLcode res = curl_easy_perform(curl);
 	if (res != CURLE_OK)
@@ -86,7 +86,7 @@ static void webPOSTRequestThread(void* arg)
 	    ret = webPOSTRequestThreadImp(prec);
 	}
 	catch(...) {
-		errlogSevPrintf(errlogMajor, "%s failed\n", prec->name);
+		errlogSevPrintf(errlogMajor, "%s webPOSTRequestThread failed\n", prec->name);
 		ret = 1;
 	}
     struct rset *prset =(struct rset *)(prec->rset);
@@ -100,15 +100,22 @@ static long webPOSTRequest(aSubRecord *prec)
 {
 	if (prec->pact == 0)
 	{
-	    prec->pact = 1;
-	    epicsThreadCreate("webPOSTRequest", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), webPOSTRequestThread, prec);
-	    return 0;
+	    if (epicsThreadCreate("webPOSTRequest", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), webPOSTRequestThread, prec) != 0)
+		{
+			prec->pact = 1;
+			return 0;
+		}
+		else
+		{
+		    errlogSevPrintf(errlogMajor, "%s epicsThreadCreate failed\n", prec->name);
+	        return -1;
+		}
 	}
 	else
 	{
-		if (prec->dpvt == 0)
+		if (prec->dpvt == 0) /* dpvt contains return status */
 		{
-			return 0;			
+			return 0;
 		}
 		else
 		{

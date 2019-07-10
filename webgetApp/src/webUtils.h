@@ -14,3 +14,5 @@ static const char* getString(void* arg, short type, int len)
         return NULL;
     }
 }
+
+extern long webFormURLEncode(aSubRecord *prec);

@@ -71,7 +71,7 @@ static void addEncodedString(CURL *curl, std::string& result, void* arg1, short 
  * args alternate, result if A=B&C=D etc.
  * "name" must always be a string, but value can be string or waveform
  */
-static long webFormURLEncode(aSubRecord *prec) 
+long webFormURLEncode(aSubRecord *prec)
 {
     if (prec->ftva != menuFtypeCHAR)
 	{
@@ -103,3 +103,4 @@ static long webFormURLEncode(aSubRecord *prec)
 extern "C" {
     epicsRegisterFunction(webFormURLEncode); /* must also be mentioned in asubFunctions.dbd */
 }
+

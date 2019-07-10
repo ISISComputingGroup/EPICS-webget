@@ -32,6 +32,20 @@ webget_LIBS_WIN32 += libcurl
 webget_SYS_LIBS_Linux += curl
 webget_LIBS += $(EPICS_BASE_IOC_LIBS)
 
+# googleTest Runner
+
+ifeq ($(findstring 10.0,$(VCVERSION)),)
+
+TESTPROD_HOST += runner
+USR_CPPFLAGS += -I$(GTEST)/googletest/include
+runner_SRCS += webget_tests.cpp run_all_tests.cc webFormURLEncode.cpp
+runner_LIBS += gtest
+runner_LIBS += $(EPICS_BASE_IOC_LIBS)
+runner_LIBS_WIN32 += libcurl
+runner_SYS_LIBS_Linux += curl
+
+endif
+
 #===========================
 
 include $(TOP)/configure/RULES
