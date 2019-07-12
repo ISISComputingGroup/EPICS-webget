@@ -36,6 +36,7 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
  *  Post a message using CURL
  *  @ingroup asub_functions
  *  @param[in] prec Pointer to aSub record
+ *  if url says "test" the request is not posted
  */
 static int webPOSTRequestThreadImp(aSubRecord* prec) 
 {
@@ -59,7 +60,16 @@ static int webPOSTRequestThreadImp(aSubRecord* prec)
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, prec);	
 	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 	std::cerr << prec->name << ": POSTing \"" << urlEncodedFormData << "\" to " << url << std::endl;
-	CURLcode res = curl_easy_perform(curl);
+	CURLcode res;
+	if (!strcmp(url, "test"))
+	{
+	    res = curl_easy_perform(curl);
+	}
+	else
+	{
+	    std::cerr << prec->name << ": TESTING: ignoring url" << std::endl;
+		res = CURLE_OK;
+	}
 	if (res != CURLE_OK)
 	{
 		errlogSevPrintf(errlogMajor, "%s curl_easy_perform() failed: %s\n", prec->name, curl_easy_strerror(res));
