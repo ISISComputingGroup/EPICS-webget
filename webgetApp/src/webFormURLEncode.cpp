@@ -1,12 +1,8 @@
-/** @file charToStringWaveform.c
- *  @author Freddie Akeroyd, STFC (freddie.akeroyd@stfc.ac.uk)
+/** @file webFormURLEncode.cpp
+ *
  *  @ingroup asub_functions
  *
- *  Copy a CHAR waveform record into a STRING waveform record. If this is done by
- *  a normal CAPUT the character byte codes are not preserved
- *
- *  It expect the A input to be the waveform data and B to be "NORD" (number of elements)
- *  it write its output to VALA
+ *  create a urlEncoded string ready to send to a web server
  */
 #include <string>
 #include <cstring>
@@ -25,6 +21,7 @@
 
 #include <epicsExport.h>
 
+/// encode a string as part of building a form urlencoded request
 static std::string getEncodedString(CURL *curl, void* arg1, short type1, int len1, void* arg2, short type2, int len2)
 {
 	const char* s1 = getString(arg1, type1, len1);

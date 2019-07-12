@@ -1,12 +1,7 @@
-/** @file charToStringWaveform.c
- *  @author Freddie Akeroyd, STFC (freddie.akeroyd@stfc.ac.uk)
+/** @file webPOSTRequest.cpp
  *  @ingroup asub_functions
  *
- *  Copy a CHAR waveform record into a STRING waveform record. If this is done by
- *  a normal CAPUT the character byte codes are not preserved
- *
- *  It expect the A input to be the waveform data and B to be "NORD" (number of elements)
- *  it write its output to VALA
+ * Post a mesage using CURL
  */
 #include <string>
 #include <iostream>
@@ -38,11 +33,10 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
 }
 
 /**
- *  Convert a character waveform into a string waveform
+ *  Post a message using CURL
  *  @ingroup asub_functions
  *  @param[in] prec Pointer to aSub record
  */
-
 static int webPOSTRequestThreadImp(aSubRecord* prec) 
 {
 	const char* url = getString(prec->a, prec->fta, prec->noa);
@@ -76,6 +70,7 @@ static int webPOSTRequestThreadImp(aSubRecord* prec)
 
 typedef long (*rset_process_t)(dbCommon *);
 
+/// post data and then notify epics when done 
 static void webPOSTRequestThread(void* arg) 
 {
 	
@@ -96,6 +91,8 @@ static void webPOSTRequestThread(void* arg)
     dbScanUnlock(pcomrec);
 }
 
+/// create thread to do asynchronous posting and return
+/// data to post is in asub arg A, it has been urlencoded elsewhere
 static long webPOSTRequest(aSubRecord *prec) 
 {
 	if (prec->pact == 0)
@@ -125,5 +122,5 @@ static long webPOSTRequest(aSubRecord *prec)
 }
 
 extern "C" {
-    epicsRegisterFunction(webPOSTRequest); /* must also be mentioned in asubFunctions.dbd */
+    epicsRegisterFunction(webPOSTRequest); /* must also be mentioned in dbd file */
 }
