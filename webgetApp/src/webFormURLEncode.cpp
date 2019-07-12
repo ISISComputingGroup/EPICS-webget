@@ -67,6 +67,7 @@ static void addEncodedString(CURL *curl, std::string& result, void* arg1, short 
  *
  * args alternate, result if A=B&C=D etc.
  * "name" must always be a string, but value can be string or waveform
+ * see sendAlert.db for further examples
  */
 long webFormURLEncode(aSubRecord *prec)
 {

@@ -93,6 +93,7 @@ static void webPOSTRequestThread(void* arg)
 
 /// create thread to do asynchronous posting and return
 /// data to post is in asub arg A, it has been urlencoded elsewhere
+/// see sendAlert.db for calling details
 static long webPOSTRequest(aSubRecord *prec) 
 {
 	if (prec->pact == 0)
