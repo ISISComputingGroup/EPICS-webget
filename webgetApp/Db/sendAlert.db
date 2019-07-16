@@ -1,7 +1,13 @@
-## You need to caput to MOBILES:SP and EMAILS:SP as ; separated lists, they are autosaved
-## Also need to set PW:SP and URL:SP  and INST:SP as per wiki page
+##
+## allows sending an alert message by constructinbg a form and posting to an external web site
+##
+## You need to caput to MOBILES:SP and EMAILS:SP as ; separated lists, these are autosaved
+##
+## INST:SP should be the name of the instrument generating the alert
+## URL:SP and PW:SP need to be set as per the sharepoint access page 
+##
 ## SOURCE:SP is optionally specified by macro on DB load, defaults to "IBEX"
-## Write message to $(P)$(Q)MESSAGE:SP to send it
+## Then write a message to $(P)$(Q)MESSAGE:SP to send it
 
 record(stringin, "$(P)$(Q)MOBILES:TAG")
 {
@@ -36,6 +42,7 @@ record(stringin, "$(P)$(Q)MESSAGE:TAG")
     field(VAL, "message")
 }
 
+## message to send
 record(waveform, "$(P)$(Q)MESSAGE:SP")
 {
     field(DESC, "Message to send")

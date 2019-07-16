@@ -1,12 +1,7 @@
-/** @file charToStringWaveform.c
- *  @author Freddie Akeroyd, STFC (freddie.akeroyd@stfc.ac.uk)
+/** @file webPOSTRequest.cpp
  *  @ingroup asub_functions
  *
- *  Copy a CHAR waveform record into a STRING waveform record. If this is done by
- *  a normal CAPUT the character byte codes are not preserved
- *
- *  It expect the A input to be the waveform data and B to be "NORD" (number of elements)
- *  it write its output to VALA
+ * Post a mesage using CURL
  */
 #include <string>
 #include <iostream>
@@ -24,6 +19,8 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 
+#include <epicsExport.h>
+
 #include "webUtils.h"
 
 // nmemb can be 0 and data may not be NULL terminated
@@ -35,13 +32,12 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
 	return nmemb;
 }
 
-#include <epicsExport.h>
 /**
- *  Convert a character waveform into a string waveform
+ *  Post a message using CURL
  *  @ingroup asub_functions
  *  @param[in] prec Pointer to aSub record
+ *  if url says "test" the request is not posted
  */
-
 static int webPOSTRequestThreadImp(aSubRecord* prec) 
 {
 	const char* url = getString(prec->a, prec->fta, prec->noa);
@@ -50,22 +46,30 @@ static int webPOSTRequestThreadImp(aSubRecord* prec)
 	if (curl == NULL)
 	{
          errlogPrintf("%s curl init error", prec->name);
-		 return 1;		
+		 return 1;
 	}
 	if (url == NULL || urlEncodedFormData == NULL)
 	{
          errlogPrintf("%s input args A or B are invalid", prec->name);
-		 return 1;		
+		 return 1;
 	}
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, urlEncodedFormData);
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, prec);	
-	// curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
-	// need CURLOPT_NOSIGNAL set to 1 ?
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
 	std::cerr << prec->name << ": POSTing \"" << urlEncodedFormData << "\" to " << url << std::endl;
-	CURLcode res = curl_easy_perform(curl);
+	CURLcode res;
+	if (!strcmp(url, "test"))
+	{
+	    res = curl_easy_perform(curl);
+	}
+	else
+	{
+	    std::cerr << prec->name << ": TESTING: ignoring url" << std::endl;
+		res = CURLE_OK;
+	}
 	if (res != CURLE_OK)
 	{
 		errlogSevPrintf(errlogMajor, "%s curl_easy_perform() failed: %s\n", prec->name, curl_easy_strerror(res));
@@ -76,6 +80,7 @@ static int webPOSTRequestThreadImp(aSubRecord* prec)
 
 typedef long (*rset_process_t)(dbCommon *);
 
+/// post data and then notify epics when done 
 static void webPOSTRequestThread(void* arg) 
 {
 	
@@ -86,7 +91,7 @@ static void webPOSTRequestThread(void* arg)
 	    ret = webPOSTRequestThreadImp(prec);
 	}
 	catch(...) {
-		errlogSevPrintf(errlogMajor, "%s failed\n", prec->name);
+		errlogSevPrintf(errlogMajor, "%s webPOSTRequestThread failed\n", prec->name);
 		ret = 1;
 	}
     struct rset *prset =(struct rset *)(prec->rset);
@@ -96,19 +101,29 @@ static void webPOSTRequestThread(void* arg)
     dbScanUnlock(pcomrec);
 }
 
+/// create thread to do asynchronous posting and return
+/// data to post is in asub arg A, it has been urlencoded elsewhere
+/// see sendAlert.db for calling details
 static long webPOSTRequest(aSubRecord *prec) 
 {
 	if (prec->pact == 0)
 	{
-	    prec->pact = 1;
-	    epicsThreadCreate("webPOSTRequest", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), webPOSTRequestThread, prec);
-	    return 0;
+	    if (epicsThreadCreate("webPOSTRequest", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), webPOSTRequestThread, prec) != 0)
+		{
+			prec->pact = 1;
+			return 0;
+		}
+		else
+		{
+		    errlogSevPrintf(errlogMajor, "%s epicsThreadCreate failed\n", prec->name);
+	        return -1;
+		}
 	}
 	else
 	{
-		if (prec->dpvt == 0)
+		if (prec->dpvt == 0) /* dpvt contains return status */
 		{
-			return 0;			
+			return 0;
 		}
 		else
 		{
@@ -118,5 +133,5 @@ static long webPOSTRequest(aSubRecord *prec)
 }
 
 extern "C" {
-    epicsRegisterFunction(webPOSTRequest); /* must also be mentioned in asubFunctions.dbd */
+    epicsRegisterFunction(webPOSTRequest); /* must also be mentioned in dbd file */
 }

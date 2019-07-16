@@ -16,6 +16,8 @@ SNCSEQ=$(SUPPORT)/seq/master
 SQLITE=$(SUPPORT)/sqlite/master
 UTILITIES=$(SUPPORT)/utilities/master
 ZLIB=$(SUPPORT)/zlib/master
+
+GTEST=$(SUPPORT)/googletest/master
 # END OF AUTO GENERATED DEPENDENCIES
 
 # optional extra local definitions here
