@@ -43,6 +43,7 @@ runner_LIBS += gtest
 runner_LIBS += $(EPICS_BASE_IOC_LIBS)
 runner_LIBS_WIN32 += libcurl
 runner_SYS_LIBS_Linux += curl
+runner_SYS_LIBS_WIN32 += wldap32 crypt32 Normaliz
 
 endif
 
