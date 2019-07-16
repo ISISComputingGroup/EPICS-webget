@@ -4,6 +4,8 @@
  * Post a mesage using CURL
  */
 #include <string>
+#include <cstring>
+#include <cstdlib>
 #include <iostream>
 
 #include <registryFunction.h>
