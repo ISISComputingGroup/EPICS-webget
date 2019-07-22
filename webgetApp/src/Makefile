@@ -41,7 +41,7 @@ USR_CPPFLAGS += -I$(GTEST)/googletest/include
 runner_SRCS += webget_tests.cpp run_all_tests.cc webFormURLEncode.cpp
 runner_LIBS += gtest
 runner_LIBS += $(EPICS_BASE_IOC_LIBS)
-runner_LIBS_WIN32 += libcurl
+runner_LIBS_WIN32 += libcurl zlib
 runner_SYS_LIBS_Linux += curl
 runner_SYS_LIBS_WIN32 += wldap32 crypt32 Normaliz
 
