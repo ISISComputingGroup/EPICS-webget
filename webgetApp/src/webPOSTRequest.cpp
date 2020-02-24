@@ -65,12 +65,12 @@ static int webPOSTRequestThreadImp(aSubRecord* prec)
 	CURLcode res;
 	if (!strcmp(url, "test"))
 	{
-	    res = curl_easy_perform(curl);
+	    std::cerr << prec->name << ": TESTING: ignoring url" << std::endl;
+		res = CURLE_OK;
 	}
 	else
 	{
-	    std::cerr << prec->name << ": TESTING: ignoring url" << std::endl;
-		res = CURLE_OK;
+	    res = curl_easy_perform(curl);
 	}
 	if (res != CURLE_OK)
 	{
