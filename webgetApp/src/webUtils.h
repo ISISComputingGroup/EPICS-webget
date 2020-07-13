@@ -16,3 +16,4 @@ static const char* getString(void* arg, short type, int len)
 }
 
 extern long webFormURLEncode(aSubRecord *prec);
+extern long webPOSTRequest(aSubRecord *prec);

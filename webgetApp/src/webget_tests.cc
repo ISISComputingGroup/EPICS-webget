@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <epicsString.h>
+#include <epicsThread.h>
 #include <aSubRecord.h>
 #include <menuFtype.h>
 
@@ -8,11 +9,18 @@
 
 // setup asub record, assumes a,b,c etc fields are consecutive in structure
 // so "b" can be accessed using pointer arithmetic from "a"  
-static void setupArg(aSubRecord *prec, int index, const char* val)
+static void setupStringArg(aSubRecord *prec, int index, const char* val)
 {
     *(&(prec->a) + index * (&(prec->b) - &(prec->a))) = strdup(val);
 	*(&(prec->fta) + index * (&(prec->ftb) - &(prec->fta))) = menuFtypeSTRING;
 	*(&(prec->noa) + index * (&(prec->nob) - &(prec->noa))) = 1;
+}
+
+static void setupWaveformArg(aSubRecord *prec, int index, const char* val)
+{
+    *(&(prec->a) + index * (&(prec->b) - &(prec->a))) = strdup(val);
+	*(&(prec->fta) + index * (&(prec->ftb) - &(prec->fta))) = menuFtypeCHAR;
+	*(&(prec->noa) + index * (&(prec->nob) - &(prec->noa))) = strlen(val);
 }
 
 namespace {
@@ -24,10 +32,10 @@ namespace {
 		rec.vala = new char[rec.nova];
 		
         // WHEN
-		setupArg(&rec, 0, "a");
-		setupArg(&rec, 1, "b");
-		setupArg(&rec, 2, "c");
-		setupArg(&rec, 3, " ");
+		setupStringArg(&rec, 0, "a");
+		setupStringArg(&rec, 1, "b");
+		setupStringArg(&rec, 2, "c");
+		setupStringArg(&rec, 3, " ");
 		
 		int ret = webFormURLEncode(&rec);
 
@@ -36,4 +44,45 @@ namespace {
 		EXPECT_EQ(rec.neva, strlen((const char*)rec.vala));
         EXPECT_STREQ((const char*)rec.vala, "a=b&c=%20");
     }
+    
+    TEST(Webget, test_GIVEN_encoded_data_and_test_url_THEN_check_send_ok){
+        // GIVEN
+		aSubRecord rec;
+        memset(&rec, 0, sizeof(rec));
+		
+        // WHEN
+		setupWaveformArg(&rec, 0, "test");
+		setupWaveformArg(&rec, 1, "a=b&c=%20");
+		
+		int ret = webPOSTRequest(&rec);
+        while(rec.pact != 0)
+        {
+            epicsThreadSleep(0.1); // wait for background thread to finish
+        }
+
+        // THEN
+		EXPECT_EQ(ret, 0);
+        EXPECT_EQ((uintptr_t)rec.dpvt, 0); // background thread return status, 0 on success
+    }
+
+    TEST(Webget, test_GIVEN_encoded_data_and_silly_url_THEN_check_send_fails){
+        // GIVEN
+		aSubRecord rec;
+        memset(&rec, 0, sizeof(rec));
+		
+        // WHEN
+		setupWaveformArg(&rec, 0, "http://idonot.exist/dummy");
+		setupWaveformArg(&rec, 1, "a=b&c=%20");
+		
+		int ret = webPOSTRequest(&rec);
+        while(rec.pact != 0)
+        {
+            epicsThreadSleep(0.1); // wait for background thread to finish
+        }
+
+        // THEN
+		EXPECT_EQ(ret, 0);
+        EXPECT_NE((uintptr_t)rec.dpvt, 0); // background thread return status, non zero on error
+    }
+
 } // namespace
