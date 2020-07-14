@@ -17,8 +17,8 @@ testwebgetApp_DEPEND_DIRS += webgetApp
 
 include $(TOP)/configure/RULES_TOP
 
-.PHONY: test
-test:
+.PHONY: runtests
+runtests:
 ifneq ($(wildcard $(TEST_RUNNER)*),)
 	run_tests.bat $(EPICS_HOST_ARCH)
 endif
