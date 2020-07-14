@@ -13,8 +13,6 @@ $(foreach dir, $(filter-out configure,$(DIRS)),$(eval $(call DIR_template,$(dir)
 iocBoot_DEPEND_DIRS += $(filter %App,$(DIRS))
 testwebgetApp_DEPEND_DIRS += webgetApp
 
-TEST_RUNNER = $(TOP)/webgetApp/src/O.$(EPICS_HOST_ARCH)/runner
-
 # Add any additional dependency rules here:
 
 include $(TOP)/configure/RULES_TOP
@@ -22,5 +20,5 @@ include $(TOP)/configure/RULES_TOP
 .PHONY: test
 test:
 ifneq ($(wildcard $(TEST_RUNNER)*),)
-	$(TEST_RUNNER) --gtest_output=xml:$(TOP)/test-reports/TEST-Webget.xml
+	run_tests.bat $(EPICS_HOST_ARCH)
 endif
