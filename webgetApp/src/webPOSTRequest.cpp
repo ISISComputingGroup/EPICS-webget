@@ -65,12 +65,12 @@ static int webPOSTRequestThreadImp(aSubRecord* prec)
 	CURLcode res;
 	if (!strcmp(url, "test"))
 	{
-	    res = curl_easy_perform(curl);
+	    std::cerr << prec->name << ": TESTING: ignoring url" << std::endl;
+		res = CURLE_OK;
 	}
 	else
 	{
-	    std::cerr << prec->name << ": TESTING: ignoring url" << std::endl;
-		res = CURLE_OK;
+	    res = curl_easy_perform(curl);
 	}
 	if (res != CURLE_OK)
 	{
@@ -97,16 +97,27 @@ static void webPOSTRequestThread(void* arg)
 		ret = 1;
 	}
     struct rset *prset =(struct rset *)(prec->rset);
-    dbScanLock(pcomrec);
+    // if lset is NULL we are testing with Google Test, so fake record processing
+    if (prec->lset != NULL)
+    {
+        dbScanLock(pcomrec);
+    }
 	prec->dpvt = reinterpret_cast<void*>(ret); // store return val in driver private area
-    (*(rset_process_t)prset->process)(pcomrec); // needed until USE_TYPED_RSET available
-    dbScanUnlock(pcomrec);
+    if (prec->lset != NULL)
+    {
+        (*(rset_process_t)prset->process)(pcomrec); // needed until USE_TYPED_RSET available
+        dbScanUnlock(pcomrec);
+    }
+    else
+    {
+        prec->pact = 0;
+    }
 }
 
 /// create thread to do asynchronous posting and return
 /// data to post is in asub arg A, it has been urlencoded elsewhere
 /// see sendAlert.db for calling details
-static long webPOSTRequest(aSubRecord *prec) 
+long webPOSTRequest(aSubRecord *prec) 
 {
 	if (prec->pact == 0)
 	{
