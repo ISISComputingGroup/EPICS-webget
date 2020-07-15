@@ -92,9 +92,8 @@ long webFormURLEncode(aSubRecord *prec)
 	addEncodedString(curl, result, prec->m , prec->ftm, prec->nom, prec->n, prec->ftn, prec->non);
 	addEncodedString(curl, result, prec->o , prec->fto, prec->noo, prec->p, prec->ftp, prec->nop);
 	curl_easy_cleanup(curl);
-    char* str_out = (char*)prec->vala;
 	strncpy((char*)prec->vala, result.c_str(), prec->nova);
-	prec->neva = (result.size() < prec->nova ? result.size() : prec->nova);
+	prec->neva = (result.size() < prec->nova ? result.size() + 1: prec->nova); // +1 to include NULL
     return 0; /* process output links */
 }
 

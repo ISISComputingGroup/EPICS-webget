@@ -3,7 +3,6 @@
 ##
 ## You need to caput to MOBILES:SP and EMAILS:SP as ; separated lists, these are autosaved
 ##
-## INST:SP should be the name of the instrument generating the alert
 ## URL:SP and PW:SP need to be set as per the sharepoint access page 
 ##
 ## SOURCE:SP is optionally specified by macro on DB load, defaults to "IBEX"
@@ -82,7 +81,7 @@ record(stringin, "$(P)$(Q)INST:TAG")
 record(stringin, "$(P)$(Q)INST:SP")
 {
     field(DESC, "Instrument name for alerts")
-    info(autosaveFields, "VAL")
+    field(VAL, "$(INST=Unknown)")
 }
 
 ## URL to send request to

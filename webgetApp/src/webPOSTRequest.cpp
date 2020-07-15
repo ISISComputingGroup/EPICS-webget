@@ -64,11 +64,11 @@ static int webPOSTRequestThreadImp(aSubRecord* prec)
 	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
     if (debug)
     {
-	    std::cerr << prec->name << ": POSTing \"" << urlEncodedFormData << "\" to URL " << url << std::endl;
+	    std::cerr << prec->name << ": POSTing data \"" << urlEncodedFormData << "\" to URL \"" << url << "\"" << std::endl;
     }
     else
     {
-	    std::cerr << prec->name << ": POSTing data to URL " << url << std::endl;
+	    std::cerr << prec->name << ": POSTing data to URL \"" << url << "\"" << std::endl;
     }
 	CURLcode res;
 	if (!strcmp(url, "test"))
