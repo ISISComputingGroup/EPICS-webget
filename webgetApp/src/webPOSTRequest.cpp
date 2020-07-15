@@ -42,6 +42,7 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
  */
 static int webPOSTRequestThreadImp(aSubRecord* prec) 
 {
+    static bool debug = (getenv("WEBGET_POST_DEBUG") != NULL ? true : false);
 	const char* url = getString(prec->a, prec->fta, prec->noa);
 	const char* urlEncodedFormData = getString(prec->b, prec->ftb, prec->nob); /* from webFormURLEncode() */
 	CURL *curl = curl_easy_init();
@@ -61,7 +62,14 @@ static int webPOSTRequestThreadImp(aSubRecord* prec)
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, prec);	
 	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
-	std::cerr << prec->name << ": POSTing \"" << urlEncodedFormData << "\" to " << url << std::endl;
+    if (debug)
+    {
+	    std::cerr << prec->name << ": POSTing \"" << urlEncodedFormData << "\" to URL " << url << std::endl;
+    }
+    else
+    {
+	    std::cerr << prec->name << ": POSTing data to URL " << url << std::endl;
+    }
 	CURLcode res;
 	if (!strcmp(url, "test"))
 	{

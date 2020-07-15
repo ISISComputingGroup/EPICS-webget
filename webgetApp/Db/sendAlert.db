@@ -43,6 +43,7 @@ record(stringin, "$(P)$(Q)MESSAGE:TAG")
 }
 
 ## message to send
+## write to this to trigger sending
 record(waveform, "$(P)$(Q)MESSAGE:SP")
 {
     field(DESC, "Message to send")
@@ -146,11 +147,18 @@ record(waveform, "$(P)$(Q)_POSTFIELDS:RES")
 
 record(aSub, "$(P)$(Q)_WEBSEND")
 {
-	field(SNAM, "webPOSTRequest")
+    field(SNAM, "webPOSTRequest")
     field(INPA, "$(P)$(Q)URL:SP NPP")
     field(FTA, "CHAR")
     field(NOA, 1024)
     field(INPB, "$(P)$(Q)_POSTFIELDS:RES NPP")
     field(FTB, "CHAR")
     field(NOB, 1024)
+    field(FLNK, "$(P)$(Q)_SENDCNT")
+}
+
+## keep a count of messages sent, useful for system tests
+record(calc, "$(P)$(Q)_SENDCNT")
+{
+    field(CALC, "A := A + 1; A")
 }
