@@ -41,7 +41,7 @@ namespace {
 
         // THEN
 		EXPECT_EQ(ret, 0);
-		EXPECT_EQ(rec.neva, strlen((const char*)rec.vala));
+		EXPECT_EQ(rec.neva, strlen((const char*)rec.vala) + 1);
         EXPECT_STREQ((const char*)rec.vala, "a=b&c=%20");
     }
     
