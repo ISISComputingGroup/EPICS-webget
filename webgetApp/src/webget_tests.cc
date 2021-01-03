@@ -27,6 +27,7 @@ namespace {
     TEST(Webget, test_GIVEN_data_THEN_check_encoded_ok){
         // GIVEN
 		aSubRecord rec;
+        memset(&rec, 0, sizeof(rec));
 		rec.ftva = menuFtypeCHAR;
 		rec.nova = 256;
 		rec.vala = new char[rec.nova];
