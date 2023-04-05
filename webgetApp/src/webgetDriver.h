@@ -41,7 +41,7 @@ private:
 	
 	bool checkOption(WebgetOptions option) { return (m_options & (unsigned)option) != 0; }
 	
-	void readURL(const char* url, std::string& data);
+	int readURL(const char* url, std::string& data);
 	static int tidyHTML2XHTML(const std::string& html_in, std::string& xhtml_out, bool warnings);
 	static std::string runXPath(const std::string& xml_str, const std::string& xpath_str);
 
