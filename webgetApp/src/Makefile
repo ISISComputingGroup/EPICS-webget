@@ -17,11 +17,6 @@ DBD += webget.dbd
 
 ifeq ($(STATIC_BUILD),YES)
 USR_CPPFLAGS += -DCURL_STATICLIB 
-USE_CPPFLAGS_WIN32 += -DTIDY_EXPORT=extern
-endif
-
-ifeq ($(SHARED_LIBRARIES),YES)
-USR_CPPFLAGS_WIN32 += -DTIDY_EXPORT=__declspec(dllimport)
 endif
 
 # specify all source files to be compiled and added to the library
