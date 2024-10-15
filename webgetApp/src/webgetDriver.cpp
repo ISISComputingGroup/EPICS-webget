@@ -159,25 +159,28 @@ void webgetDriver::processURL()
 int webgetDriver::readURL(const char* url, std::string& data)
 {
     data.clear();
-	std::string raw_data;
-	CURL *curl = curl_easy_init();
+    std::string raw_data;
+    CURL *curl = curl_easy_init();
     CURLcode res = CURLE_FAILED_INIT;
     if(curl) 
-	{
+    {
         WriteCallbackData* cd = new WriteCallbackData(raw_data);
         curl_easy_setopt(curl, CURLOPT_URL, url);
-	    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)cd);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
         res = curl_easy_perform(curl);
-        if(res != CURLE_OK)
-		{
+        if(res == CURLE_OK)
+        {
+            tidyHTML2XHTML(raw_data , data, checkOption(TidyWarnings));
+        }
+        else
+        {
             errlogPrintf("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-		}
+        }
         curl_easy_cleanup(curl);
-		delete cd;
-		tidyHTML2XHTML(raw_data , data, checkOption(TidyWarnings));
-	}
+        delete cd;
+    }
     return res;
 }
 
