@@ -22,7 +22,7 @@ endif
 # specify all source files to be compiled and added to the library
 webget_SRCS += webgetDriver.cpp webFormURLEncode.cpp webPOSTRequest.cpp
 
-webget_LIBS += asyn htmltidy pugixml
+webget_LIBS += asyn tidy pugixml
 webget_LIBS_WIN32 += libcurl
 webget_SYS_LIBS_Linux += curl
 webget_LIBS += $(EPICS_BASE_IOC_LIBS)
