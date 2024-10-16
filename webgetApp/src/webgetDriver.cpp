@@ -34,7 +34,7 @@
 
 // HTMLtidy
 #include <tidy.h>
-#include <buffio.h>
+#include <tidybuffio.h>
 #include <stdio.h>
 #include <errno.h>
 
@@ -134,41 +134,54 @@ void webgetDriver::processURL()
 {
 	char url0[256], xpath0[256];
 	std::string data, value;
-	    getStringParam(P_URL0, sizeof(url0), url0);
-	    getStringParam(P_XPath0, sizeof(xpath0), xpath0);
-		if (strlen(url0) > 0)
-		{
-		    readURL(url0, data);
-			value = runXPath(data, xpath0);
-			setStringParam(P_Data0, value.c_str());
-			setIntegerParam(P_IData0, atol(value.c_str()));
-			setDoubleParam(P_FData0, atof(value.c_str()));
-			callParamCallbacks();
-		}
+	getStringParam(P_URL0, sizeof(url0), url0);
+	getStringParam(P_XPath0, sizeof(xpath0), xpath0);
+	if (strlen(url0) > 0)
+	{
+	    int res = readURL(url0, data);
+        if (res == CURLE_OK)
+        {
+		    value = runXPath(data, xpath0);
+		    setStringParam(P_Data0, value.c_str());
+		    setIntegerParam(P_IData0, atol(value.c_str()));
+		    setDoubleParam(P_FData0, atof(value.c_str()));
+        }
+        else
+        {
+            setParamStatus(P_Data0, asynError);
+            setParamStatus(P_IData0, asynError);
+            setParamStatus(P_FData0, asynError);
+        }
+		callParamCallbacks();
+	}
 }
 
-void webgetDriver::readURL(const char* url, std::string& data)
+int webgetDriver::readURL(const char* url, std::string& data)
 {
     data.clear();
-	std::string raw_data;
-	CURL *curl = curl_easy_init();
+    std::string raw_data;
+    CURL *curl = curl_easy_init();
+    CURLcode res = CURLE_FAILED_INIT;
     if(curl) 
-	{
-        CURLcode res;
+    {
         WriteCallbackData* cd = new WriteCallbackData(raw_data);
         curl_easy_setopt(curl, CURLOPT_URL, url);
-	    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)cd);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
         res = curl_easy_perform(curl);
-        if(res != CURLE_OK)
-		{
+        if(res == CURLE_OK)
+        {
+            tidyHTML2XHTML(raw_data , data, checkOption(TidyWarnings));
+        }
+        else
+        {
             errlogPrintf("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-		}
+        }
         curl_easy_cleanup(curl);
-		delete cd;
-		tidyHTML2XHTML(raw_data , data, checkOption(TidyWarnings));
-	}
+        delete cd;
+    }
+    return res;
 }
 
 asynStatus webgetDriver::readOctet(asynUser *pasynUser, char *value, size_t maxChars, size_t *nActual, int *eomReason)
