@@ -22,8 +22,8 @@ endif
 # specify all source files to be compiled and added to the library
 webget_SRCS += webgetDriver.cpp webFormURLEncode.cpp webPOSTRequest.cpp
 
-webget_LIBS += asyn tidy pugixml libssl libcrypto zlib
-webget_LIBS_WIN32 += libcurl
+webget_LIBS += asyn tidy pugixml zlib
+webget_LIBS_WIN32 += libcurl libssl libcrypto
 webget_SYS_LIBS_Linux += curl
 webget_LIBS += $(EPICS_BASE_IOC_LIBS)
 
