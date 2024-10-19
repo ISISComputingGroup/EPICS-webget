@@ -22,7 +22,7 @@ endif
 # specify all source files to be compiled and added to the library
 webget_SRCS += webgetDriver.cpp webFormURLEncode.cpp webPOSTRequest.cpp
 
-webget_LIBS += asyn tidy pugixml
+webget_LIBS += asyn tidy pugixml libssl libcrypto zlib
 webget_LIBS_WIN32 += libcurl
 webget_SYS_LIBS_Linux += curl
 webget_LIBS += $(EPICS_BASE_IOC_LIBS)
@@ -34,8 +34,8 @@ ifeq ($(findstring 10.0,$(VCVERSION)),)
 GTESTPROD_HOST += runner
 runner_SRCS += webget_tests.cpp webFormURLEncode.cpp webPOSTRequest.cpp
 runner_LIBS += $(EPICS_BASE_IOC_LIBS)
-runner_LIBS_WIN32 += libcurl zlib
-runner_SYS_LIBS_Linux += curl
+runner_LIBS_WIN32 += libcurl libssl libcrypto zlib
+runner_SYS_LIBS_Linux += curl 
 runner_SYS_LIBS_WIN32 += wldap32 crypt32 Normaliz
 
 endif

@@ -36,9 +36,9 @@ $(APPNAME)_LIBS += pvdump $(MYSQLLIB) easySQLite sqlite
 $(APPNAME)_LIBS += caPutLog
 $(APPNAME)_LIBS += icpconfig pugixml
 $(APPNAME)_LIBS += autosave
-$(APPNAME)_LIBS += utilities pcrecpp pcre libjson zlib
+$(APPNAME)_LIBS += utilities pcrecpp pcre libjson
 ## Add other libraries here ##
-$(APPNAME)_LIBS += webget asyn tidy pugixml
+$(APPNAME)_LIBS += webget asyn tidy pugixml libssl libcrypto zlib
 $(APPNAME)_LIBS_WIN32 += libcurl
 $(APPNAME)_SYS_LIBS_Linux += curl
 $(APPNAME)_SYS_LIBS_WIN32 += wldap32 crypt32 Normaliz
