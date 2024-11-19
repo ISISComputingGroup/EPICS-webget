@@ -176,7 +176,7 @@ int webgetDriver::readURL(const char* url, std::string& data)
         }
         else
         {
-            errlogPrintf("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+            errlogPrintf("curl_easy_perform() failed for URL \"%s\": %s\n", url, curl_easy_strerror(res));
         }
         curl_easy_cleanup(curl);
         delete cd;
