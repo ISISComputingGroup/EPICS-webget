@@ -13,3 +13,4 @@ runIOC.sh
 relPaths.sh
 .project
 test-reports/
+dllCopy.bat
