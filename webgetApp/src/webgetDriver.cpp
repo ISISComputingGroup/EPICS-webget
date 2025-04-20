@@ -141,10 +141,13 @@ void webgetDriver::processURL()
 	    int res = readURL(url0, data);
         if (res == CURLE_OK)
         {
-		    value = runXPath(data, xpath0);
-		    setStringParam(P_Data0, value.c_str());
-		    setIntegerParam(P_IData0, atol(value.c_str()));
-		    setDoubleParam(P_FData0, atof(value.c_str()));
+            value = runXPath(data, xpath0);
+            setStringParam(P_Data0, value.c_str());
+            setIntegerParam(P_IData0, atol(value.c_str()));
+            setDoubleParam(P_FData0, atof(value.c_str()));
+            setParamStatus(P_Data0, asynSuccess);
+            setParamStatus(P_IData0, asynSuccess);
+            setParamStatus(P_FData0, asynSuccess);
         }
         else
         {
