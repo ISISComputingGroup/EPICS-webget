@@ -43,21 +43,21 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
 static int webPOSTRequestThreadImp(aSubRecord* prec) 
 {
     static bool debug = (getenv("WEBGET_POST_DEBUG") != NULL ? true : false);
-	const char* url = getString(prec->a, prec->fta, prec->noa);
-	const char* urlEncodedFormData = getString(prec->b, prec->ftb, prec->nob); /* from webFormURLEncode() */
+	std::string url = getString(prec->a, prec->fta, prec->noa);
+	std::string urlEncodedFormData = getString(prec->b, prec->ftb, prec->nob); /* from webFormURLEncode() */
 	CURL *curl = curl_easy_init();
 	if (curl == NULL)
 	{
          errlogPrintf("%s curl init error", prec->name);
 		 return 1;
 	}
-	if (url == NULL || urlEncodedFormData == NULL)
+	if (url.size() == 0 || urlEncodedFormData.size() == 0)
 	{
          errlogPrintf("%s input args A or B are invalid", prec->name);
 		 return 1;
 	}
-	curl_easy_setopt(curl, CURLOPT_URL, url);
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, urlEncodedFormData);
+	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, urlEncodedFormData.c_str());
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, prec);	
@@ -71,7 +71,7 @@ static int webPOSTRequestThreadImp(aSubRecord* prec)
 	    std::cerr << prec->name << ": POSTing data to URL \"" << url << "\"" << std::endl;
     }
 	CURLcode res;
-	if (!strcmp(url, "test"))
+	if (url == "test")
 	{
 	    std::cerr << prec->name << ": TESTING: ignoring url" << std::endl;
 		res = CURLE_OK;

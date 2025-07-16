@@ -24,14 +24,14 @@
 /// encode a string as part of building a form urlencoded request
 static std::string getEncodedString(CURL *curl, void* arg1, short type1, int len1, void* arg2, short type2, int len2)
 {
-	const char* s1 = getString(arg1, type1, len1);
-	const char* s2 = getString(arg2, type2, len2);
-	if (s1 == NULL || s2 == NULL)
+	std::string s1 = getString(arg1, type1, len1);
+	std::string s2 = getString(arg2, type2, len2);
+	if (s1.size() == 0 || s2.size() == 0)
 	{
 		return "";
 	}
-	char* es1 = curl_easy_escape(curl, s1, 0);
-	char* es2 = curl_easy_escape(curl, s2, 0);
+	char* es1 = curl_easy_escape(curl, s1.c_str(), 0);
+	char* es2 = curl_easy_escape(curl, s2.c_str(), 0);
 	if (es1 == NULL || es2 == NULL)
 	{
 		return "";

@@ -1,17 +1,16 @@
-
-static const char* getString(void* arg, short type, int len)
+static std::string getString(void* arg, short type, int len)
 {
     if (type == menuFtypeSTRING && len == 1)
     {
-        return *(epicsOldString*)arg;
+        return std::string(*(epicsOldString*)arg, sizeof(epicsOldString));
     }
     else if (type == menuFtypeCHAR)
     {
-        return (const char*)arg;
+        return std::string((const char*)arg, len);
     }
     else
     {
-        return NULL;
+        return "";
     }
 }
 
