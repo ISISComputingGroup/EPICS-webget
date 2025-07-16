@@ -19,17 +19,20 @@ static void setupStringArg(aSubRecord *prec, int index, const char* val)
     strncpy((char*)*arg, val, sizeof(epicsOldString));
 	*(&(prec->fta) + index * (&(prec->ftb) - &(prec->fta))) = menuFtypeSTRING;
 	*(&(prec->noa) + index * (&(prec->nob) - &(prec->noa))) = 1;
+	*(&(prec->nea) + index * (&(prec->neb) - &(prec->nea))) = 1;
 }
 
 static void setupWaveformArg(aSubRecord *prec, int index, const char* val)
 {
+    int n = 1024;
 	void** arg = &(prec->a) + index * (&(prec->b) - &(prec->a));
     if (*arg == NULL) {
-        *arg = malloc(1024);
+        *arg = malloc(n);
     }        
     strncpy((char*)*arg, val, strlen(val));
 	*(&(prec->fta) + index * (&(prec->ftb) - &(prec->fta))) = menuFtypeCHAR;
-	*(&(prec->noa) + index * (&(prec->nob) - &(prec->noa))) = strlen(val);
+	*(&(prec->noa) + index * (&(prec->nob) - &(prec->noa))) = n;
+	*(&(prec->nea) + index * (&(prec->neb) - &(prec->nea))) = strlen(val);
 }
 
 namespace {

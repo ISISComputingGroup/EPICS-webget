@@ -43,8 +43,8 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdat
 static int webPOSTRequestThreadImp(aSubRecord* prec) 
 {
     static bool debug = (getenv("WEBGET_POST_DEBUG") != NULL ? true : false);
-	std::string url = getString(prec->a, prec->fta, prec->noa);
-	std::string urlEncodedFormData = getString(prec->b, prec->ftb, prec->nob); /* from webFormURLEncode() */
+	std::string url = getString(prec->a, prec->fta, prec->nea);
+	std::string urlEncodedFormData = getString(prec->b, prec->ftb, prec->neb); /* from webFormURLEncode() */
 	CURL *curl = curl_easy_init();
 	if (curl == NULL)
 	{

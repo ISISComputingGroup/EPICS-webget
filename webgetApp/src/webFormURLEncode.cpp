@@ -83,14 +83,14 @@ long webFormURLEncode(aSubRecord *prec)
          errlogPrintf("%s curl init error", prec->name);
 		 return -1;		
 	}
-	addEncodedString(curl, result, prec->a , prec->fta, prec->noa, prec->b, prec->ftb, prec->nob);
-	addEncodedString(curl, result, prec->c , prec->ftc, prec->noc, prec->d, prec->ftd, prec->nod);
-	addEncodedString(curl, result, prec->e , prec->fte, prec->noe, prec->f, prec->ftf, prec->nof);
-	addEncodedString(curl, result, prec->g , prec->ftg, prec->nog, prec->h, prec->fth, prec->noh);
-	addEncodedString(curl, result, prec->i , prec->fti, prec->noi, prec->j, prec->ftj, prec->noj);
-	addEncodedString(curl, result, prec->k , prec->ftk, prec->nok, prec->l, prec->ftl, prec->nol);
-	addEncodedString(curl, result, prec->m , prec->ftm, prec->nom, prec->n, prec->ftn, prec->non);
-	addEncodedString(curl, result, prec->o , prec->fto, prec->noo, prec->p, prec->ftp, prec->nop);
+	addEncodedString(curl, result, prec->a , prec->fta, prec->nea, prec->b, prec->ftb, prec->neb);
+	addEncodedString(curl, result, prec->c , prec->ftc, prec->nec, prec->d, prec->ftd, prec->ned);
+	addEncodedString(curl, result, prec->e , prec->fte, prec->nee, prec->f, prec->ftf, prec->nef);
+	addEncodedString(curl, result, prec->g , prec->ftg, prec->neg, prec->h, prec->fth, prec->neh);
+	addEncodedString(curl, result, prec->i , prec->fti, prec->nei, prec->j, prec->ftj, prec->nej);
+	addEncodedString(curl, result, prec->k , prec->ftk, prec->nek, prec->l, prec->ftl, prec->nel);
+	addEncodedString(curl, result, prec->m , prec->ftm, prec->nem, prec->n, prec->ftn, prec->nen);
+	addEncodedString(curl, result, prec->o , prec->fto, prec->neo, prec->p, prec->ftp, prec->nep);
 	curl_easy_cleanup(curl);
 	strncpy((char*)prec->vala, result.c_str(), prec->nova);
 	prec->neva = (result.size() < prec->nova ? result.size() + 1: prec->nova); // +1 to include NULL

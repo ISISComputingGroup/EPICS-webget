@@ -1,12 +1,17 @@
+#include <epicsString.h>
+
 static std::string getString(void* arg, short type, int len)
 {
+    // use strnlen to avoid embedded nulls
     if (type == menuFtypeSTRING && len == 1)
     {
-        return std::string(*(epicsOldString*)arg, sizeof(epicsOldString));
+        size_t n = epicsStrnLen(*(epicsOldString*)arg, sizeof(epicsOldString));
+        return std::string(*(epicsOldString*)arg, n);
     }
     else if (type == menuFtypeCHAR)
     {
-        return std::string((const char*)arg, len);
+        size_t n = epicsStrnLen((const char*)arg, len);
+        return std::string((const char*)arg, n);
     }
     else
     {
