@@ -9,18 +9,30 @@
 
 // setup asub record, assumes a,b,c etc fields are consecutive in structure
 // so "b" can be accessed using pointer arithmetic from "a"  
+
 static void setupStringArg(aSubRecord *prec, int index, const char* val)
 {
-    *(&(prec->a) + index * (&(prec->b) - &(prec->a))) = strdup(val);
+	void** arg = &(prec->a) + index * (&(prec->b) - &(prec->a));
+    if (*arg == NULL) {
+        *arg = malloc(sizeof(epicsOldString));
+    }        
+    strncpy((char*)*arg, val, sizeof(epicsOldString));
 	*(&(prec->fta) + index * (&(prec->ftb) - &(prec->fta))) = menuFtypeSTRING;
 	*(&(prec->noa) + index * (&(prec->nob) - &(prec->noa))) = 1;
+	*(&(prec->nea) + index * (&(prec->neb) - &(prec->nea))) = 1;
 }
 
 static void setupWaveformArg(aSubRecord *prec, int index, const char* val)
 {
-    *(&(prec->a) + index * (&(prec->b) - &(prec->a))) = strdup(val);
+    int n = 1024;
+	void** arg = &(prec->a) + index * (&(prec->b) - &(prec->a));
+    if (*arg == NULL) {
+        *arg = malloc(n);
+    }        
+    strncpy((char*)*arg, val, strlen(val));
 	*(&(prec->fta) + index * (&(prec->ftb) - &(prec->fta))) = menuFtypeCHAR;
-	*(&(prec->noa) + index * (&(prec->nob) - &(prec->noa))) = strlen(val);
+	*(&(prec->noa) + index * (&(prec->nob) - &(prec->noa))) = n;
+	*(&(prec->nea) + index * (&(prec->neb) - &(prec->nea))) = strlen(val);
 }
 
 namespace {
@@ -29,13 +41,13 @@ namespace {
 		aSubRecord rec;
         memset(&rec, 0, sizeof(rec));
 		rec.ftva = menuFtypeCHAR;
-		rec.nova = 256;
+		rec.nova = 1024;
 		rec.vala = new char[rec.nova];
 		
         // WHEN
-		setupStringArg(&rec, 0, "a");
-		setupStringArg(&rec, 1, "b");
-		setupStringArg(&rec, 2, "c");
+		setupStringArg(&rec, 0, "ahdhdhd");
+		setupWaveformArg(&rec, 1, "hhjkdhfjkasghfas@fhdskagh;jjj@phf");
+		setupStringArg(&rec, 2, "kfkf");
 		setupStringArg(&rec, 3, " ");
 		
 		int ret = webFormURLEncode(&rec);
@@ -43,7 +55,21 @@ namespace {
         // THEN
 		EXPECT_EQ(ret, 0);
 		EXPECT_EQ(rec.neva, strlen((const char*)rec.vala) + 1);
-        EXPECT_STREQ((const char*)rec.vala, "a=b&c=%20");
+        EXPECT_STREQ((const char*)rec.vala, "ahdhdhd=hhjkdhfjkasghfas%40fhdskagh%3Bjjj%40phf&kfkf=%20");
+
+        // WHEN
+		setupStringArg(&rec, 0, "ahdh");
+		setupWaveformArg(&rec, 1, "hhjkdhfj@fhds;a@b");
+		setupStringArg(&rec, 2, "kf");
+		setupStringArg(&rec, 3, "t");
+		
+		ret = webFormURLEncode(&rec);
+
+        // THEN
+		EXPECT_EQ(ret, 0);
+		EXPECT_EQ(rec.neva, strlen((const char*)rec.vala) + 1);
+        EXPECT_STREQ((const char*)rec.vala, "ahdh=hhjkdhfj%40fhds%3Ba%40b&kf=t");
+
     }
     
     TEST(Webget, test_GIVEN_encoded_data_and_test_url_THEN_check_send_ok){
